@@ -272,6 +272,21 @@ Proof.
     case H.
 Qed.
 
+
+(*
+Theorem thm_eqb_a_t_2: (forall a:bool, (Is_true (eqb a true)) -> (Is_true a)).
+Proof.
+  intros a.
+  simpl.
+  intros H.
+  case a.
+    simpl. trivial.
+    
+    simpl. simpl in H. 
+
+Qed.
+*)
+
 (* Inductive or (A B:Prop) : Prop :=
   | or_introl : A -> A \/ B
   | or_intror : B -> A \/ B
@@ -282,3 +297,209 @@ Theorem left_or : (forall A B : Prop, A -> A \/ B).
 Proof.
   intros A B.
   intros proof_of_A.
+  (* exact (or_introl proof_of_A). *)
+  pose (proof_of_A_or_B := or_introl proof_of_A : A \/ B).
+  exact proof_of_A_or_B.
+Qed.
+
+
+Theorem right_or : (forall A B : Prop, B -> A \/ B).
+  intros A B.
+  intros proof_of_B.
+  refine (or_intror _).
+    exact proof_of_B.
+Qed.
+
+Theorem right_or2 : (forall A B : Prop, B -> A \/ B).
+  intros A B.
+  intros proof_of_B.
+  refine (or_intror proof_of_B).
+Qed.
+
+Theorem or_commutes : (forall A B, A \/ B -> B \/ A).
+Proof.
+  intros A B.
+  intros A_or_B.
+  case A_or_B.
+    intros proof_of_A.
+    exact (or_intror proof_of_A).
+  
+    intros proof_of_B.
+    exact (or_introl proof_of_B).
+Qed.
+
+(*
+Inductive and (A B:Prop) : Prop :=
+  conj : A -> B -> A /\ B
+
+where "A /\ B" := (and A B) : type_scope.
+*)
+
+Theorem both_and : (forall A B : Prop, A -> B -> A /\ B).
+Proof.
+  intros A B.
+  intros proof_of_A proof_of_B.
+  refine (conj _ _).
+    exact proof_of_A.
+    exact proof_of_B.
+Qed.
+Extraction both_and.
+
+Theorem and_commutes : (forall A B, A /\ B -> B /\ A).
+Proof.
+  intros A B.
+  intros A_and_B.
+  case A_and_B.
+    intros proof_of_A.
+    intros proof_of_B.
+    exact (conj proof_of_B proof_of_A).
+Qed.
+
+
+Theorem and_commutes__again : (forall A B, A /\ B -> B /\ A).
+Proof.
+  intros A B.
+  intros A_and_B.
+  destruct A_and_B as [ proof_of_A proof_of_B].
+  refine (conj _ _).
+    exact proof_of_B.
+    exact proof_of_A.
+Qed.
+
+
+(*
+Infix "&&" := andb : bool_scope.
+Infix "" := orb : bool_scope.
+*)
+
+(*
+Definition iff (A B:Prop) := (A -> B) /\ (B -> A).
+Notation "A <-> B" := (iff A B) : type_scope.
+*)
+
+Theorem orb_is_or : (forall a b, Is_true (orb a b) <-> Is_true a \/ Is_true b).
+Proof.
+  intros a b.
+  unfold iff.
+  
+  refine (conj _ _).
+    intros H.
+    case a, b.
+      simpl. exact (or_introl I).
+      simpl. exact (or_introl I).
+      simpl. exact (or_intror I).
+      simpl. simpl in H. (* exact (or_introl H). *) case H.
+
+    intros H.
+    case a, b.
+      simpl. exact I.
+      simpl. exact I.
+      simpl. exact I.
+      simpl. simpl in H. case H. trivial. trivial.
+
+  (*
+  case a.
+    case b.
+      simpl.
+      refine (conj _ _).
+        intros.
+        exact (or_introl I).
+
+        intros.
+        exact I.
+
+       
+      simpl.
+      refine (conj _ _).
+        intros.
+        exact (or_introl I).
+
+        intros.
+        exact I.
+
+    case b.
+      simpl.
+      refine (conj _ _).
+        intros.
+        exact (or_intror I).
+ 
+        intros _.
+        exact I.
+
+      simpl.
+      refine (conj _ _).
+        intros f.
+        exact (or_introl f).
+
+        intros f_or_f.
+        case f_or_f.
+          intros f.
+          exact f.
+
+          intros f.
+          exact f.
+  *)
+Qed.
+        
+Theorem andb_is_and : (forall a b, Is_true (andb a b) <-> Is_true a /\ Is_true b).
+Proof.
+  intros a b.
+  unfold iff.
+  refine (conj _ _).
+    intros H.
+    case a, b.
+      simpl. exact (conj I I).
+      simpl. simpl in H. case H.
+      simpl. simpl in H. case H.
+      simpl. simpl in H. case H.
+
+    intros lala.
+    case a,b.
+      simpl. trivial.
+      simpl in lala. destruct lala as [ A B]. case B. (* case lala. intros _ f. exact f. *)
+      simpl. simpl in lala. case lala. intros f _. case f.
+      simpl. simpl in lala. case lala. intros f _. case f.
+Qed.
+
+
+Theorem negb_is_not : (forall a, Is_true (negb a) <-> (~(Is_true a))).
+Proof.
+  intros a.
+  unfold "<->".
+  unfold not.
+  (* case a. *)
+  refine (conj _ _).
+    case a.
+      simpl. intros f _. case f.
+      simpl. intros _ f. case f.
+
+    case a.
+      simpl. intros True_implies_False. exact (True_implies_False I).
+      simpl. intros _. exact I.
+Qed.
+
+(*
+Inductive ex (A:Type) (P:A -> Prop) : Prop :=
+  ex_intro : forall x:A, P x -> ex (A:=A) P.
+
+Inductive ex (A:Type) (P:A -> Prop) : 
+
+Notation "'exists' x .. y , p" := (ex (fun x => .. (ex (fun y => p)) ..))
+  (at level 200, x binder, right associativity,
+   format "'[' 'exists'  '/  ' x  ..  y ,  '/  ' p ']'")
+  : type_scope.
+*)
+
+Definition basic_predicate
+:=
+  (fun a => Is_true (andb a true))
+.
+
+Theorem thm_exists_basics : (ex basic_predicate).
+Proof.
+  pose (witness := true).
+  refine (ex_intro basic_predicate witness _).
+    unfold basic_predicate.
+    simpl.
+    exact I.
+Qed.
