@@ -478,11 +478,18 @@ Proof.
       simpl. intros _. exact I.
 Qed.
 
-(*
-Inductive ex (A:Type) (P:A -> Prop) : Prop :=
-  ex_intro : forall x:A, P x -> ex (A:=A) P.
+Print ex.
 
-Inductive ex (A:Type) (P:A -> Prop) : 
+Print or.
+
+(*
+Inductive ex (A : Type) (P : A -> Prop) : Prop :=
+  ex_intro : forall x : A, P x -> ex (A) P.
+*)
+
+
+
+(*
 
 Notation "'exists' x .. y , p" := (ex (fun x => .. (ex (fun y => p)) ..))
   (at level 200, x binder, right associativity,
@@ -490,16 +497,72 @@ Notation "'exists' x .. y , p" := (ex (fun x => .. (ex (fun y => p)) ..))
   : type_scope.
 *)
 
-Definition basic_predicate
+Definition basic_predicate : bool -> Prop
 :=
   (fun a => Is_true (andb a true))
 .
 
 Theorem thm_exists_basics : (ex basic_predicate).
 Proof.
+  (*
   pose (witness := true).
   refine (ex_intro basic_predicate witness _).
     unfold basic_predicate.
     simpl.
     exact I.
+  *)
+(*
+Unset Printing Notations.
+  simpl.
+SearchAbout .
+Locate "exists".
+Print ex.
+Check ex.
+Extraction ex.
+  pose (witness := true).
+  refine (ex_intro basic_predicate witness _).
+    simpl.
+    exact I.
+    intros H.
+    Check basic_predicate.
+    exact (basic_predicate true).  
+*)
+(*
+refine (ex_intro basic_predicate true _).
+  simpl.
+  unfold basic_predicate.
+  simpl.
+  unfold Is_true.
+  exact (I).
+*)
+
+refine (ex_intro _ true I).
+ 
+Qed.
+
+ Theorem thm_exists_basics__again : (exists a, Is_true (andb a true)).
+Proof.
+  pose (witness := true).
+(*
+  refine (ex_intro _ _ _).
+  exact (Is_true (andb true true)).
+*)
+  refine (ex_intro _ witness _).
+    simpl.
+    exact I.
+Qed.
+
+Theorem thm_forall_exists : (forall b, (exists a, Is_true(eqb a b))).
+Proof.
+  intros b.
+  case b.
+    refine (ex_intro _ true I).
+    refine (ex_intro _ false I).
+Qed.
+
+Theorem thm_forall_exists__again : (forall b, (exists a, Is_true(eqb a b))).
+Proof.
+  intros b.
+  refine (ex_intro _ b _). 
+     exact (eqb_a_a b).
 Qed.
