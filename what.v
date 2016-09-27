@@ -566,3 +566,58 @@ Proof.
   refine (ex_intro _ b _). 
      exact (eqb_a_a b).
 Qed.
+
+Theorem thm_forall_exists__again2 : (forall (b : bool), (exists (a : bool), Is_true(eqb a b))).
+Proof.
+  intros b.
+  refine ((ex_intro _) b _).
+    case b.
+      simpl.
+      exact I.
+
+      simpl.
+      exact I.
+Qed.
+
+
+Theorem forall_exists : (forall P : Set->Prop, (forall x, ~(P x)) -> ~(exists x, P x)).
+Proof.
+  intros p.
+  intros lala.
+  unfold not.
+  unfold not in lala.
+  intros existsbaba.
+  destruct existsbaba as [ ].
+  pose (haha := lala x).
+  pose (gaga := haha H).
+  case gaga.
+Qed.
+
+
+
+Theorem forall_exists_2 : (forall P : Set->Prop, (forall x, ~(P x)) -> ~(exists x, P x)).
+Proof.
+  intros P forallXNotPX notExistsPX.
+  unfold not in forallXNotPX, notExistsPX.
+  case notExistsPX.
+  intros x.
+  intros Px.
+  case (forallXNotPX x Px).
+  
+  (*
+  intros P forallXNotPX notExistsPX.
+  unfold not in forallXNotPX, notExistsPX.
+  destruct notExistsPX.
+  exact (forallXNotPX x H).
+  *)
+Qed.
+
+Theorem exists_forall : (forall P : Set->Prop, ~(exists x, P x) -> (forall x, ~(P x))).
+Proof.
+  intros.
+  unfold not.
+  unfold not in H.
+  intros Px.
+  case H.
+  exact (ex_intro P x Px).
+Qed.
