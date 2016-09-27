@@ -621,3 +621,58 @@ Proof.
   case H.
   exact (ex_intro P x Px).
 Qed.
+
+Theorem lalala_eq : (forall (A : Set) (x : A), eq x x).
+Proof.
+  intros.
+  exact (eq_refl : eq x x).
+Qed.
+
+
+Theorem thm_eq_sym : (forall x y : Set, x = y -> y = x).
+Proof.
+intros x y.
+intros eq_x_y.
+(*
+case eq_x_y.
+exact eq_refl.
+*)
+destruct eq_x_y.
+exact eq_refl.
+Qed.
+
+Theorem thm_eq_trans : (forall x y z: Set, x = y -> y = z -> x = z).
+Proof.
+intros.
+destruct H, H0.
+exact eq_refl.
+Qed.
+
+(*Require Coq.*)
+Require Coq.Setoids.Setoid.
+Theorem thm_eq_trans__again : (forall x y z: Set, x = y -> y = z -> x = z).
+Proof.
+intros.
+rewrite H.
+rewrite <- H0.
+exact eq_refl.
+Qed.
+
+Theorem andb_sym : (forall a b, a && b = b && a).
+Proof.
+intros.
+case a,b.
+  simpl. exact eq_refl.
+  simpl. exact eq_refl. 
+  simpl. exact eq_refl.
+  simpl. exact eq_refl.
+Qed.
+
+Theorem neq_nega: (forall a, a <> (negb a)).
+Proof.
+intros.
+unfold not.
+case a.
+  intros. unfold negb in H. discriminate.
+  intros. unfold negb in H. discriminate.
+Qed.
