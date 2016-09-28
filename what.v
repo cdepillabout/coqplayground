@@ -761,3 +761,96 @@ Proof.
   exact (eq_refl).
 Qed.
 
+
+(*
+Definition hd (A : Type) (default : A) (l : list A) : A
+:=
+  match l with
+    | nil => default
+    | h :: _ => h
+  end.
+*)
+
+
+Definition my_hd_for_nat_lists : list nat -> nat
+:=
+  hd 0.
+
+Compute my_hd_for_nat_lists nil.
+
+Compute my_hd_for_nat_lists (5 :: 4 :: nil).
+
+Theorem correctness_of_hd :
+   (forall A:Type,
+   (forall (default : A) (x : A) (lst : list A),
+   (hd default nil) = default /\ (hd default (x :: lst)) = x)).
+Proof.
+  intros.
+  simpl.
+  refine (conj _ _).
+    exact eq_refl.
+    exact eq_refl.
+Qed.
+
+
+Definition hd_error (A : Type) (l : list A)
+:=
+  match l with
+    | nil => None
+    | x :: _ => Some x
+  end.
+
+Compute hd_error nat nil.
+
+Compute hd_error nat (5 :: 4 :: nil).
+
+Theorem correctness_of_hd_error :
+   (forall A:Type,
+   (forall (x : A) (lst : list A),
+   (hd_error A nil) = None /\ (hd_error A (x :: lst)) = Some x)).
+Proof.
+  intros.
+  simpl.
+  refine (conj _ _).
+    exact eq_refl.
+    exact eq_refl.
+Qed.
+
+Definition hd_never_fail (A : Type) (lst : list A) (safety_proof : lst <> nil)
+  : A
+:=
+  (match lst as b return (lst = b -> A) with
+    | nil => (fun foo : lst = nil =>
+                   match (safety_proof foo) return A with
+                   end
+                )
+    | x :: _ => (fun foo : lst = x :: _ =>
+                   x
+                )
+  end) eq_refl.
+
+Theorem cons_cant_equal_nil : (forall (A: Type), (forall (x : A) (rest : list A),
+  (x :: rest) <> nil)).
+Proof.
+  unfold not.
+  intros.
+  discriminate H.
+Qed.
+
+Theorem correctness_of_hd_never_fail :
+   (forall A:Type,
+   (forall (x : A) (rest : list A),
+   (exists safety_proof : ((x :: rest) <> nil),
+      (hd_never_fail A (x :: rest) safety_proof) = x))).
+Proof.
+  unfold not.
+  intros.
+  assert (witness : ((x :: rest) <> nil)).
+    unfold not.
+    exact (cons_cant_equal_nil A x rest).
+  
+    unfold not in witness.
+    refine (ex_intro _ witness _).
+    simpl.
+    exact (eq_refl).
+Qed.
