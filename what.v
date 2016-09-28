@@ -673,6 +673,91 @@ Proof.
 intros.
 unfold not.
 case a.
-  intros. unfold negb in H. discriminate.
-  intros. unfold negb in H. discriminate.
+  unfold negb. discriminate.
+  unfold negb. intros. discriminate H.
 Qed.
+
+
+Theorem plus_2_3 : (S (S O)) + (S (S (S O))) = (S (S (S (S (S O))))).
+Proof.
+  simpl.
+  (* exact (eq_refl 5). *)
+  exact (eq_refl (S (S (S (S (S O)))))).
+Qed.
+
+Theorem plus_O_n : (forall n, O + n = n).
+Proof.
+  intros.
+  simpl.
+  exact (eq_refl n).
+Qed.
+
+
+Theorem associativity_of_plus : (forall (n : nat) (m : nat), n + m = m + n).
+Proof.
+  admit.
+Qed.
+
+Theorem plus_n_O : (forall n, n + O = n).
+Proof.
+  intros.
+  (* case n. *)
+  (*
+  induction n.
+    exact eq_refl.
+  
+    simpl.
+    rewrite IHn.
+    exact eq_refl.
+  *)
+  (* apply nat_ind with (n := n). *)
+  elim n.
+    (* apply eq_refl. *)
+    exact eq_refl.
+
+    intros m H.
+    simpl.
+    rewrite H.
+    exact (eq_refl).
+Qed.
+
+
+Theorem plus_sym: (forall n m, n + m = m + n).
+Proof.
+  intros n.
+  elim n.
+    intros m.
+    elim m.
+      simpl. exact (eq_refl).
+
+      intros.
+      simpl.
+      rewrite <- H.
+      simpl.
+      exact (eq_refl (S n0)).
+
+    intros.
+    simpl.
+    simpl H.
+    rewrite (H m).
+    elim m.
+      simpl. exact (eq_refl).
+
+      intros.
+      simpl.
+      rewrite H0.
+      exact (eq_refl).
+Qed.
+
+Require Import List.
+
+Theorem cons_adds_one_to_length :
+   (forall A:Type, (forall (x : A) (lst : list A),
+    length (x :: lst) = (S (length lst)))
+   ).
+Proof.
+  intros.
+  simpl.
+  exact (eq_refl).
+Qed.
+
