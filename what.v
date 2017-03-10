@@ -837,6 +837,14 @@ Proof.
   discriminate H.
 Qed.
 
+Goal forall A B C:Prop, A /\ B /\ C \/ B /\ C \/ C /\ A -> C.
+  intros.
+  decompose [and or] H.
+    assumption.
+    assumption.
+    assumption.
+Qed.
+
 Theorem correctness_of_hd_never_fail :
    (forall A:Type,
    (forall (x : A) (rest : list A),
@@ -845,12 +853,123 @@ Theorem correctness_of_hd_never_fail :
 Proof.
   unfold not.
   intros.
-  assert (witness : ((x :: rest) <> nil)).
-    unfold not.
+  assert (witness : ((x :: rest) = nil -> False)).
     exact (cons_cant_equal_nil A x rest).
   
-    unfold not in witness.
-    refine (ex_intro _ witness _).
-    simpl.
-    exact (eq_refl).
+  refine (ex_intro _ witness _).
+  simpl.
+  exact (eq_refl).
 Qed.
+
+Definition tl_error (A : Type) (l : list A) 
+  : option (list A) 
+:= match l with
+   | nil => None
+   | _ :: tail => Some tail
+   end.
+
+Theorem correctness_of_tl_error :
+   (forall A:Type,
+   (forall (x : A) (lst : list A),
+   (tl_error A nil) = None /\ (tl_error A (x :: lst)) = Some lst)).
+Proof.
+  intros.
+  refine (conj _ _).
+    simpl.  trivial.
+    simpl.  trivial.
+Qed.
+
+Theorem hd_tl :
+   (forall A:Type,
+   (forall (default : A) (x : A) (lst : list A),
+   (hd default (x::lst)) :: (tl (x::lst)) = (x :: lst))).
+Proof.
+  intros.
+  simpl.
+  trivial.
+Qed.
+
+Theorem app_nil_l : (forall A:Type, (forall l:list A, nil ++ l = l)).
+Proof.
+  intros.
+  simpl.
+  trivial.
+Qed.
+
+Theorem app_nil_r : (forall A:Type, (forall l:list A, l ++ nil = l)).
+Proof.
+  intros.
+  elim l.
+    simpl. trivial.
+ 
+    intros.
+    simpl.
+    rewrite H.
+    trivial.
+Qed.
+
+Theorem app_comm_cons : forall A (x y:list A) (a:A), a :: (x ++ y) = (a :: x) ++ y.
+Proof.
+  intros.
+  simpl.
+  trivial.
+Qed.
+
+
+Theorem app_assoc : forall A (l m n:list A), l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  intros.
+  simpl.
+  case l,m,n.
+    simpl. trivial.
+    
+    simpl. trivial.
+
+    simpl. trivial.
+
+    simpl. trivial.
+
+    simpl.
+    replace (app l nil) with (l).
+    replace (app l nil) with (l).
+    trivial.
+
+    pose (witness := app_nil_r A l).
+    rewrite (witness).
+    trivial.
+
+    pose (witness := app_nil_r A l).
+    rewrite (witness).
+    trivial.
+
+    simpl.
+    replace (app l nil) with (l).
+    trivial.
+
+    pose (witness := app_nil_r A l).
+    rewrite (witness).
+    trivial.
+
+    simpl.
+
+    admit.
+    
+    admit.
+Qed.
+
+Theorem app_cons_not_nil : forall A (x y:list A) (a:A), nil <> x ++ a :: y.
+Proof.
+  intros.
+  unfold not.
+  intros.
+  case x, y.
+    simpl in H.
+    discriminate H.
+
+    discriminate H.
+    
+    discriminate H.
+
+    discriminate H.
+Qed.
+    
